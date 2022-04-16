@@ -1,0 +1,22 @@
+{
+  "status": true,
+  "title": "Debug",
+  "color": "32m",
+  "debug.launch_application": {
+    "status": true,
+    "title": "Application",
+    "color": "33m",
+    "message": "{{ client.tag }} est lancer !"
+  },
+  "debug.start_modules": {
+    "status": true,
+    "title": "Modules",
+    "color": "34m",
+    "message": "($c{{ module.tag }}$s) est correctement $clancer$s !"
+  },
+  "debug.error": {
+    "status": true,
+    "title": "Error",
+    "color": "31m"
+  }
+}
