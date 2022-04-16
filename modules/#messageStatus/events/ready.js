@@ -1,9 +1,7 @@
 const {Client} = require('discord.js');
-const Config = require('../config.json');
 
 class EventClass {
     /**
-     * @type Config
      * @private
      */
     _config;
@@ -14,8 +12,8 @@ class EventClass {
      */
     _client;
 
-    /**
-     * @param {Config} config
+    /**k
+     * @param {Object} config
      * @param {module:events.EventEmitter} events
      * @param {Client} client
      */

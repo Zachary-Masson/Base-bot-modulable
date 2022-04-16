@@ -2,7 +2,9 @@ const events = require('events');
 const { Client } = require("discord.js");
 
 const { readdirSync, existsSync } = require('fs');
-const Debug = require('./development/Debug')
+const Debug = require('./development/Debug');
+const Interaction = require('./Interaction');
+const DeployCommands = require('./DeployCommands');
 
 class ModulesClass {
     /**
@@ -38,7 +40,14 @@ class ModulesClass {
     main() {
         this._debug.message = "Mapping Modules";
         this._debug.createCategory();
+        this.setBaseVarInClient();
         this.mapping();
+        this._client.on('ready', () => DeployCommands(this._client.user.id, this._client.interaction.commands))
+    }
+
+    setBaseVarInClient() {
+        this._client['interaction'] = {};
+        this._client.interaction['commands'] = [];
     }
 
     /**
@@ -57,6 +66,8 @@ class ModulesClass {
             }
         })
         this.startEvents();
+        this.saveInteraction();
+        new Interaction(this._client, events, this._modules);
     }
 
     /**
@@ -64,19 +75,19 @@ class ModulesClass {
      * @param manifest
      */
     modulesController(manifest) {
-        const {name, tag, config, events} = manifest;
+        const {name, tag, config, events, interaction} = manifest;
         if (!name) return this.error('Missing $cname$s in "modules.manifest.js" !');
         if (!tag) return this.error('Missing $ctag$s in "modules.manifest.js" !');
-        if (!events) return this.error('Missing $cevents$s in "modules.manifest.js" !');
-        if (!this.eventsController(events)) return;
-        else {
-            this._modules.push({
-                name,
-                tag,
-                config: config ? config : {},
-                events
-            })
+        if (events) {
+            if (!this.eventsController(events)) return;
         }
+        this._modules.push({
+            name,
+            tag,
+            config: config ? config : {},
+            events,
+            interaction
+        })
     }
 
     /**
@@ -84,13 +95,16 @@ class ModulesClass {
      */
     startEvents() {
         this._modules.map(module => {
+            this._debug.message = this._debug.config["debug.start_modules"].message.replace('{{ module.tag }}', module.tag)
+            this._debug.create('start_modules')
+            if (!module['events']) return;
             module.events.map(e => {
                 e.functions.map(func => {
                     this._client.on(e.type, func.bind(this, module.config, this._events))
                 })
             })
-            this._debug.message = this._debug.config["debug.start_modules"].message.replace('{{ module.tag }}', module.tag)});
-            this._debug.create('start_modules')
+        });
+
     }
 
     /**
@@ -106,6 +120,21 @@ class ModulesClass {
             if (!functions || !functions[0]) {notError = false;return this.error('Missing $cfunctions$s of events !');}
         })
         return notError;
+    }
+
+    saveInteraction() {
+        this._modules.map(module => {
+            if (!module['interaction']) return;
+            if (module['interaction']['commands']) {
+                module['interaction']['commands'].map(commands => {
+                    if (!commands['Data']) return this.error(`Missing $cData$s "${module.tag}/"`);
+                    if (!commands['Data']['name']) return this.error(`Missing $cname$s of commands "${module.tag}/"`);
+                    if (!commands['Data']['description']) return this.error(`Missing $cdescription$s of commands "${module.tag}/${commands['Data']['name']}"`);
+                    commands['Data']['modulesParent'] = module.tag;
+                    this._client.interaction.commands.push(commands)
+                })
+            }
+        })
     }
 
     error(message) {
