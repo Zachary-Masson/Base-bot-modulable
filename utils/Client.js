@@ -40,7 +40,7 @@ class ClientClass {
      */
     main() {
         this._client = new Client({
-            partials: ["CHANNEL"],
+            partials: ["CHANNEL", "ROLES"],
             intents: [
                 Intents.FLAGS.GUILDS,
                 Intents.FLAGS.GUILD_MEMBERS,

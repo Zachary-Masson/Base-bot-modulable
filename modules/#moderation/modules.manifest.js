@@ -4,7 +4,9 @@ const ModulesManifest = {
     config: require('./config.json'),
     interaction: {
         commands: [
-            require('./commands/say')
+            require('./commands/say'),
+            require('./commands/ban'),
+            require('./commands/kick')
         ]
     }
 }

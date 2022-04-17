@@ -1,4 +1,4 @@
-const { Client } = require('discord.js')
+const { Client, Permissions, MessageEmbed } = require('discord.js')
 
 class Interaction {
     /**
@@ -38,13 +38,20 @@ class Interaction {
         })
     }
 
-    Commands(interaction) {
+    async Commands(interaction) {
         const {commandName} = interaction;
         const {Data, Commands} = this._client.interaction.commands.filter(cmd => cmd.Data.name === commandName)[0];
-        if (!Commands) interaction.reply({
-            content: 'The commands is available'
-        })
-        Commands(this._modules.filter(data => data.tag === Data.modulesParent)[0].config, this._events, this._client, interaction);
+        if (!Commands) return this.sendError(interaction, "The commands is available !");
+        if (Data['permission']) {
+            if (!isNaN(parseInt(Data['permission']))) {
+                if (interaction.guild.roles.resolve(Data['permission']) === null) return this.sendError(interaction, 'An error has occurred, please contact support with the error code : "fx05233"');
+                if (interaction.member.roles.resolve(Data['permission']) === null) return this.sendError(interaction, "You don't have permissions !")
+            }
+            else {
+                if (!interaction.member.permissions.has(Data['permission'])) return this.sendError(interaction, "You don't have permissions !")
+            }
+        }
+        Commands( Data['modulesParent'] ? this._modules.filter(data => data.tag === Data.modulesParent)[0].config : {}, this._events, this._client, interaction);
     }
 
     Buttons(interaction) {
@@ -53,6 +60,15 @@ class Interaction {
 
     SelectMenu(interaction) {
 
+    }
+
+    sendError(interaction, message) {
+        interaction.reply({
+            embeds: [
+                new MessageEmbed().setColor('#ff423c').setDescription(message)
+            ],
+            ephemeral: true
+        })
     }
 }
 

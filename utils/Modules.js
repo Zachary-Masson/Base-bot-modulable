@@ -1,5 +1,5 @@
 const events = require('events');
-const { Client } = require("discord.js");
+const { Client, Permissions } = require("discord.js");
 
 const { readdirSync, existsSync } = require('fs');
 const Debug = require('./development/Debug');
@@ -122,7 +122,16 @@ class ModulesClass {
         return notError;
     }
 
+    initializeDefaultCommands() {
+        const commandsFiles = readdirSync(`${__dirname}/commands/`)
+        commandsFiles.map(fileName => {
+            const commands = require(`${__dirname}/commands/${fileName}`);
+            this._client.interaction.commands.push(commands);
+        })
+    }
+
     saveInteraction() {
+        this.initializeDefaultCommands();
         this._modules.map(module => {
             if (!module['interaction']) return;
             if (module['interaction']['commands']) {
@@ -130,6 +139,7 @@ class ModulesClass {
                     if (!commands['Data']) return this.error(`Missing $cData$s "${module.tag}/"`);
                     if (!commands['Data']['name']) return this.error(`Missing $cname$s of commands "${module.tag}/"`);
                     if (!commands['Data']['description']) return this.error(`Missing $cdescription$s of commands "${module.tag}/${commands['Data']['name']}"`);
+                    if (commands['Data']['permission'] && isNaN(parseInt(commands['Data']['permission'])) && !Permissions.FLAGS[commands['Data']['permission']]) return this.error(`The $cPermission$s "$c${commands['Data']['permission']}$s" is not available !`)
                     commands['Data']['modulesParent'] = module.tag;
                     this._client.interaction.commands.push(commands)
                 })

@@ -1,17 +1,36 @@
-const {Client, CommandInteraction} = require('discord.js');
+const {Client, CommandInteraction, MessageEmbed} = require('discord.js');
 
-exports.Data = {
+const data = {
     name: "say",
-    description: "envoie de message par le bot",
+    description: "send your message",
+    permission: "MANAGE_MESSAGES", // or role ID
     options: [
         {
             type: 3,
             name: "message",
-            description: "votre message",
+            description: "your message",
+            required: true
+        },
+        {
+            type: 3,
+            name: "embed",
+            description: "do you want the message to be in an embed ?",
+            choices: [
+                {
+                    name: "yes",
+                    value: "true"
+                },
+                {
+                    name: "no",
+                    value: "false"
+                }
+            ],
             required: true
         }
     ]
 }
+
+exports.Data = data;
 
 exports.Commands = (config, events, client, interaction) => new Commands(config, events, client, interaction);
 
@@ -49,11 +68,19 @@ class Commands {
 
     main() {
         const message = this._interaction.options.getString('message');
-        this._interaction.channel.send(message);
+        const inEmbed = this._interaction.options.getString('embed');
+        if (inEmbed === "true") {
+            this._interaction.channel.send({
+                embeds: [
+                    new MessageEmbed().setColor('#8dff71').setDescription(message)
+                ]
+            });
+        } else {
+            this._interaction.channel.send(message);
+        }
         this._interaction.reply({
-            content: 'Message envoyer',
+            content: 'message sent',
             ephemeral: true
         })
     }
-
 }
