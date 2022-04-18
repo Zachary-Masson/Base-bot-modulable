@@ -23,13 +23,15 @@ class ClientClass {
      * @private
      */
     _debug;
+    _databaseModel;
 
     /**
      * @param {module:events.EventEmitter} Events
      */
-    constructor(Events) {
+    constructor(Events, databaseModel) {
         this._events = Events
         this._debug = new Debug();
+        this._databaseModel = databaseModel;
         this.main();
     }
 
@@ -49,7 +51,7 @@ class ClientClass {
                 Intents.FLAGS.DIRECT_MESSAGE_TYPING,
             ],
         });
-        new ModulesClass(this._events, this._client);
+        new ModulesClass(this._events, this._client, this._databaseModel);
         this.launch();
         // "process.mainModule.path" get path root
     }

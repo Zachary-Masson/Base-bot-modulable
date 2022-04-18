@@ -22,18 +22,21 @@ class ModulesClass {
      * @private
      */
     _debug;
+    _databaseModel;
 
     _modules;
 
     /**
      * @param {module:events.EventEmitter} Events
      * @param {Client} client
+     * @param databaseModel
      */
-    constructor(Events, client) {
+    constructor(Events, client, databaseModel) {
         this._events = Events;
         this._client = client;
         this._debug = new Debug();
-        this._modules = new Array();
+        this._modules = [];
+        this._databaseModel = databaseModel;
         this.main();
     }
 
@@ -48,6 +51,7 @@ class ModulesClass {
     setBaseVarInClient() {
         this._client['interaction'] = {};
         this._client.interaction['commands'] = [];
+        this._client.interaction['buttons'] = [];
     }
 
     /**
@@ -67,7 +71,7 @@ class ModulesClass {
         })
         this.startEvents();
         this.saveInteraction();
-        new Interaction(this._client, events, this._modules);
+        new Interaction(this._client, events, this._modules, this._databaseModel);
     }
 
     /**
@@ -136,12 +140,23 @@ class ModulesClass {
             if (!module['interaction']) return;
             if (module['interaction']['commands']) {
                 module['interaction']['commands'].map(commands => {
-                    if (!commands['Data']) return this.error(`Missing $cData$s "${module.tag}/"`);
+                    if (!commands['Data']) return this.error(`Missing $cData$s "${module.tag}/" in $cCommands$s`);
                     if (!commands['Data']['name']) return this.error(`Missing $cname$s of commands "${module.tag}/"`);
                     if (!commands['Data']['description']) return this.error(`Missing $cdescription$s of commands "${module.tag}/${commands['Data']['name']}"`);
                     if (commands['Data']['permission'] && isNaN(parseInt(commands['Data']['permission'])) && !Permissions.FLAGS[commands['Data']['permission']]) return this.error(`The $cPermission$s "$c${commands['Data']['permission']}$s" is not available !`)
                     commands['Data']['modulesParent'] = module.tag;
-                    this._client.interaction.commands.push(commands)
+                    this._client.interaction.commands.push(commands);
+                })
+            }
+
+            if (module['interaction']['buttons']) {
+                module['interaction']['buttons'].map(button => {
+                    if (!button['Data']) return this.error(`Missing $cData$s "${module.tag}/" in $cButton$s`);
+                    if (!button['Data']['custom_id']) return this.error(`Missing $ccustom_id$s "${module.tag}/" in $cButton$s`);
+                    if (!button['Data']['style']) return this.error(`Missing $ctype$s "${module.tag}/${button.Data.custom_id}" in $cButton$s`);
+                    if (!button['Data']['label']) return this.error(`Missing $clabel$s "${module.tag}/${button.Data.custom_id}" in $cButton$s`);
+                    button['Data']['modulesParent'] = module.tag;
+                    this._client.interaction.buttons.push(button);
                 })
             }
         })

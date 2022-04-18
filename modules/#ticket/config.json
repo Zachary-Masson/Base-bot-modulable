@@ -1,0 +1,15 @@
+{
+  "colorEmbed": "#4163ff",
+  "ticket": {
+    "name": "{{ user.username }} Ticket",
+    "parent": "965654954704523284",
+    "topic": "{{ user.id }}",
+    "firstMessage": "Welcome to your ticket, a support will take care of you as soon as possible !",
+    "roles": {
+      "support": "958451832202625068",
+      "member": "965260573346516992"
+    },
+    "maxTicketOpen": 3,
+    "timeBeforeDeletion": 5
+  }
+}
