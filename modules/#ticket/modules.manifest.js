@@ -13,4 +13,4 @@ const ModulesManifest = {
     }
 }
 
-module.exports = ModulesManifest
+module.exports = ModulesManifest;

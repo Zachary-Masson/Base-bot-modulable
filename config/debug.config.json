@@ -18,5 +18,10 @@
     "status": true,
     "title": "Error",
     "color": "31m"
+  },
+  "debug.modules": {
+    "status": true,
+    "title": "Module",
+    "color": "36m"
   }
 }

@@ -1,5 +1,7 @@
 const events = require('events');
 const { Client, Permissions } = require("discord.js");
+const packagesJson = require('../package.json');
+const { execSync } = require('child_process')
 
 const { readdirSync, existsSync } = require('fs');
 const Debug = require('./development/Debug');
@@ -69,6 +71,7 @@ class ModulesClass {
                 this.modulesController(manifest);
             }
         })
+        await this.addNewPackages();
         this.startEvents();
         this.saveInteraction();
         new Interaction(this._client, events, this._modules, this._databaseModel);
@@ -79,7 +82,7 @@ class ModulesClass {
      * @param manifest
      */
     modulesController(manifest) {
-        const {name, tag, config, events, interaction} = manifest;
+        const {name, tag, config, events, interaction, packages} = manifest;
         if (!name) return this.error('Missing $cname$s in "modules.manifest.js" !');
         if (!tag) return this.error('Missing $ctag$s in "modules.manifest.js" !');
         if (events) {
@@ -90,7 +93,8 @@ class ModulesClass {
             tag,
             config: config ? config : {},
             events,
-            interaction
+            interaction,
+            packages
         })
     }
 
@@ -104,7 +108,8 @@ class ModulesClass {
             if (!module['events']) return;
             module.events.map(e => {
                 e.functions.map(func => {
-                    this._client.on(e.type, func.bind(this, module.config, this._events))
+                    if (e.type === "ready") return this._client.on(e.type, func.bind(this, module.config, this._events, this._client, this._databaseModel));
+                    this._client.on(e.type, func.bind(this, module.config, this._events, this._databaseModel));
                 })
             })
         });
@@ -174,6 +179,41 @@ class ModulesClass {
      */
     verifyManifestExist(folderName) {
         return existsSync(`${process.mainModule.path}/modules/${folderName}/modules.manifest.js`);
+    }
+
+    async addNewPackages() {
+        const packages = [];
+        const allPackages = [];
+        let finalLineCommandsInstall = "pnpm add"
+        await this._modules.map(module => {
+            if (!module['packages']) return false;
+            module.packages.map(pkg => {
+                allPackages.push(pkg)
+                if (packages.includes(pkg)) return;
+                else return packages.push(pkg);
+            })
+        })
+        packages.map(pkg => {
+            if (!this.verifyInstallPackage(pkg)) return finalLineCommandsInstall += ` ${pkg}`
+        })
+        if (finalLineCommandsInstall !== "pnpm add") await execSync(finalLineCommandsInstall, {cwd: process.mainModule.path});
+        this.cleanPackageJson(allPackages);
+    }
+
+    verifyInstallPackage(pkg) {
+        return !!packagesJson.dependencies[pkg];
+    }
+
+    cleanPackageJson(packages) {
+        let finalLineCommandsInstall = "pnpm remove"
+        const packagesDefault = ['@discordjs/rest', 'discord-api-types', 'discord.js', 'dotenv'];
+        Object.keys(packagesJson.dependencies).map(pkg => {
+            if (packagesDefault.includes(pkg)) return;
+            if (packages.includes(pkg)) return;
+            return finalLineCommandsInstall += ` ${pkg}`;
+        })
+        if (finalLineCommandsInstall === "pnpm remove") return;
+        execSync(finalLineCommandsInstall, {cwd: process.mainModule.path})
     }
 }
 
