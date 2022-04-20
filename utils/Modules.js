@@ -109,7 +109,7 @@ class ModulesClass {
             module.events.map(e => {
                 e.functions.map(func => {
                     if (e.type === "ready") return this._client.on(e.type, func.bind(this, module.config, this._events, this._client, this._databaseModel));
-                    this._client.on(e.type, func.bind(this, module.config, this._events, this._databaseModel));
+                    this._client.on(e.type, func.bind(this, module.config, this._events, this._client, this._databaseModel));
                 })
             })
         });
