@@ -43,28 +43,38 @@ class Interaction {
 
     async Commands(interaction) {
         const {commandName} = interaction;
-        const commandSearch = this._client.interaction.commands.filter(cmd => cmd.Data.name === commandName)[0];
+        const commandSearch = this._client.interaction.commands.filter(cmd => cmd.commandData.name === commandName)[0];
         if (!commandSearch) return this.sendError(interaction, "The commands is available !");
-        const {Data, Commands} = commandSearch;
-        if (Data['permission']) {
-            if (!isNaN(parseInt(Data['permission']))) {
-                if (interaction.guild.roles.resolve(Data['permission']) === null) return this.sendError(interaction, 'An error has occurred, please contact support with the error code : "fx05233"');
-                if (interaction.member.roles.resolve(Data['permission']) === null) return this.sendError(interaction, "You don't have permissions !")
+        const {commandData, execute} = commandSearch;
+        if (commandData['permission']) {
+            if (!isNaN(parseInt(commandData['permission']))) {
+                if (interaction.guild.roles.resolve(commandData['permission']) === null) return this.sendError(interaction, 'An error has occurred, please contact support with the error code : "fx05233"');
+                if (interaction.member.roles.resolve(commandData['permission']) === null) return this.sendError(interaction, "You don't have permissions !")
             }
             else {
-                if (!interaction.member.permissions.has(Data['permission'])) return this.sendError(interaction, "You don't have permissions !")
+                if (!interaction.member.permissions.has(commandData['permission'])) return this.sendError(interaction, "You don't have permissions !")
             }
         }
-        Commands( Data['modulesParent'] ? this._modules.filter(data => data.tag === Data.modulesParent)[0].config : {}, this._events, this._client, interaction, this._databaseModel);
+        execute({
+            config: commandData['modulesParent'] ? this._modules.filter(data => data.tag === commandData.modulesParent)[0].config : {},
+            events: this._events,
+            client: this._client,
+            databaseModel: this._databaseModel
+        }, interaction);
     }
 
     Buttons(interaction) {
         const {customId} = interaction;
         const buttonID = customId.split('#')[0];
-        const buttonSearch = this._client.interaction.buttons.filter(btn => btn.Data.custom_id === buttonID)[0];
+        const buttonSearch = this._client.interaction.buttons.filter(btn => btn.buttonData.custom_id === buttonID)[0];
         if (!buttonSearch) return this.sendError(interaction, "The button is available !");
-        const {Data, Button} = buttonSearch;
-        Button( Data['modulesParent'] ? this._modules.filter(data => data.tag === Data.modulesParent)[0].config : {}, this._events, this._client, interaction, this._databaseModel);
+        const {buttonData, execute} = buttonSearch;
+        execute({
+            config: buttonData['modulesParent'] ? this._modules.filter(data => data.tag === buttonData.modulesParent)[0].config : {},
+            events: this._events,
+            client: this._client,
+            databaseModel: this._databaseModel
+        }, interaction);
     }
 
     SelectMenu(interaction) {

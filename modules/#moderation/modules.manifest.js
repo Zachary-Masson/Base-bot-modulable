@@ -2,11 +2,11 @@ const ModulesManifest = {
     name: "Moderation",
     tag: "#moderation",
     config: require('./config.json'),
-    interaction: {
+    interactions: {
         commands: [
-            require('./commands/say'),
             require('./commands/ban'),
-            require('./commands/kick')
+            require('./commands/kick'),
+            require('./commands/say')
         ]
     }
 }

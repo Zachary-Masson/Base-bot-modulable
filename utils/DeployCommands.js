@@ -6,7 +6,7 @@ module.exports = async (clientID, commands) => {
     if (!commands[0]) return;
     const Commands = [];
     commands.map(command => {
-        Commands.push(command.Data);
+        Commands.push(command.commandData);
     });
     await (async () => {
         try {

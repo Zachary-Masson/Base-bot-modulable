@@ -82,7 +82,7 @@ class ModulesClass {
      * @param manifest
      */
     modulesController(manifest) {
-        const {name, tag, config, events, interaction, packages} = manifest;
+        const {name, tag, config, events, interactions, packages} = manifest;
         if (!name) return this.error('Missing $cname$s in "modules.manifest.js" !');
         if (!tag) return this.error('Missing $ctag$s in "modules.manifest.js" !');
         if (events) {
@@ -93,7 +93,7 @@ class ModulesClass {
             tag,
             config: config ? config : {},
             events,
-            interaction,
+            interactions,
             packages
         })
     }
@@ -108,8 +108,8 @@ class ModulesClass {
             if (!module['events']) return;
             module.events.map(e => {
                 e.functions.map(func => {
-                    if (e.type === "ready") return this._client.on(e.type, func.bind(this, module.config, this._events, this._client, this._databaseModel));
-                    this._client.on(e.type, func.bind(this, module.config, this._events, this._client, this._databaseModel));
+                    if (e.type === "ready") return this._client.on(e.type, func.bind(this, {config: module.config, events: this._events, databaseModel: this._databaseModel}));
+                    this._client.on(e.type, func.bind(this, {config: module.config, events: this._events, client: this._client, databaseModel: this._databaseModel}));
                 })
             })
         });
@@ -142,25 +142,27 @@ class ModulesClass {
     saveInteraction() {
         this.initializeDefaultCommands();
         this._modules.map(module => {
-            if (!module['interaction']) return;
-            if (module['interaction']['commands']) {
-                module['interaction']['commands'].map(commands => {
-                    if (!commands['Data']) return this.error(`Missing $cData$s "${module.tag}/" in $cCommands$s`);
-                    if (!commands['Data']['name']) return this.error(`Missing $cname$s of commands "${module.tag}/"`);
-                    if (!commands['Data']['description']) return this.error(`Missing $cdescription$s of commands "${module.tag}/${commands['Data']['name']}"`);
-                    if (commands['Data']['permission'] && isNaN(parseInt(commands['Data']['permission'])) && !Permissions.FLAGS[commands['Data']['permission']]) return this.error(`The $cPermission$s "$c${commands['Data']['permission']}$s" is not available !`)
-                    commands['Data']['modulesParent'] = module.tag;
-                    this._client.interaction.commands.push(commands);
+            if (!module['interactions']) return;
+            if (module['interactions']['commands']) {
+                module['interactions']['commands'].map(command => {
+                    const {commandData} = command;
+                    if (!commandData) return this.error(`Missing $cdata$s "${module.tag}/" in $cCommands$s`);
+                    if (!commandData['name']) return this.error(`Missing $cname$s of commands "${module.tag}/"`);
+                    if (!commandData['description']) return this.error(`Missing $cdescription$s of commands "${module.tag}/${commandData['Data']['name']}"`);
+                    if (commandData['permission'] && isNaN(parseInt(commandData['permission'])) && !Permissions.FLAGS[commandData['permission']]) return this.error(`The $cPermission$s "$c${commandData['permission']}$s" is not available !`)
+                    commandData['modulesParent'] = module.tag;
+                    this._client.interaction.commands.push(command);
                 })
             }
 
-            if (module['interaction']['buttons']) {
-                module['interaction']['buttons'].map(button => {
-                    if (!button['Data']) return this.error(`Missing $cData$s "${module.tag}/" in $cButton$s`);
-                    if (!button['Data']['custom_id']) return this.error(`Missing $ccustom_id$s "${module.tag}/" in $cButton$s`);
-                    if (!button['Data']['style']) return this.error(`Missing $ctype$s "${module.tag}/${button.Data.custom_id}" in $cButton$s`);
-                    if (!button['Data']['label']) return this.error(`Missing $clabel$s "${module.tag}/${button.Data.custom_id}" in $cButton$s`);
-                    button['Data']['modulesParent'] = module.tag;
+            if (module['interactions']['buttons']) {
+                module['interactions']['buttons'].map(button => {
+                    const {buttonData} = button;
+                    if (!buttonData) return this.error(`Missing $cdata$s "${module.tag}/" in $cButton$s`);
+                    if (!buttonData['custom_id']) return this.error(`Missing $ccustom_id$s "${module.tag}/" in $cButton$s`);
+                    if (!buttonData['style']) return this.error(`Missing $ctype$s "${module.tag}/${button.Data.custom_id}" in $cButton$s`);
+                    if (!buttonData['label']) return this.error(`Missing $clabel$s "${module.tag}/${button.Data.custom_id}" in $cButton$s`);
+                    buttonData['modulesParent'] = module.tag;
                     this._client.interaction.buttons.push(button);
                 })
             }

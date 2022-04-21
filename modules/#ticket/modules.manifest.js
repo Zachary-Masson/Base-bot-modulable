@@ -2,7 +2,7 @@ const ModulesManifest = {
     name: "Ticket",
     tag: "#ticket",
     config: require('./config.json'),
-    interaction: {
+    interactions: {
         commands: [
             require('./commands/setup.commands')
         ],

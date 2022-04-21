@@ -1,7 +1,13 @@
 const Debug = require('../../../utils/development/Debug');
+const { EventsReadyOptions } = require('../../../libs/core')
+const { Client } = require('discord.js');
 
-module.exports = (config, events, client, databaseModel) => {
-    setDatabase(databaseModel);
+/**
+ * @param {EventsReadyOptions} options
+ * @param {Client} client
+ */
+module.exports = (options, client) => {
+    setDatabase(options.databaseModel)
     const express = require('express');
     const bodyParser = require('body-parser');
     const cors = require('cors');
@@ -18,7 +24,7 @@ module.exports = (config, events, client, databaseModel) => {
 
     app.get('/getChannelGuild/:userToken/:guildID', (req, res) => {
         const {userToken, guildID} = req.params;
-        const db = databaseModel.database;
+        const db = options.databaseModel.database;
         if (!db['#api']['tokenAccess'].includes(userToken)) return res.send({
             error: true,
             message: "TokeAccess is available !"
@@ -47,8 +53,8 @@ module.exports = (config, events, client, databaseModel) => {
         res.status(200).json(channels)
     })
 
-    app.listen(config.port, (e) => {
-        debug.message = `"$c#api$s" the api $clisten$s on the url : $chttp://localhost:${config.port}$s`;
+    app.listen(options.config.port, (e) => {
+        debug.message = `"$c#api$s" the api $clisten$s on the url : $chttp://localhost:${options.config.port}$s`;
         debug.create('modules');
     })
 }
