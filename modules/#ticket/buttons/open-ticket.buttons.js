@@ -1,4 +1,4 @@
-const {Button, InteractionsOptions} = require('../../../libs/core')
+const {Button, InteractionsOptions, InteractionError} = require('../../../libs/core')
 const {ButtonInteraction, MessageEmbed, MessageActionRow} = require('discord.js');
 const ButtonClose = require('./close-ticket.buttons');
 
@@ -16,7 +16,7 @@ const button = new Button({
 button.execute = async (options, interaction) => {
     const db = options.databaseModel.database;
     setupDatabase(options.databaseModel, db);
-    if (db['#ticket']['tickets'][0] && db['#ticket']['tickets'].filter(ticket => ticket.userID === interaction.user.id).length >= options.config.ticket.maxTicketOpen) return sendError(interaction, `you already have ${options.config.ticket.maxTicketOpen} open tickets !`);
+    if (db['#ticket']['tickets'][0] && db['#ticket']['tickets'].filter(ticket => ticket.userID === interaction.user.id).length >= options.config.ticket.maxTicketOpen) return InteractionError(interaction, `you already have ${options.config.ticket.maxTicketOpen} open tickets !`);
     const channel = await interaction.guild.channels.create(options.config.ticket.name.replaceAll('{{ user.username }}', interaction.user.username), {
         parent: options.config.ticket.parent,
         topic: options.config.ticket.topic.replaceAll('{{ user.id }}', interaction.user.id),
@@ -69,15 +69,6 @@ const setupDatabase = (databaseModel, db) => {
 const saveData = (databaseModel, db) => {
     databaseModel.database = db;
     databaseModel.save();
-}
-
-const sendError = (interaction, message) => {
-    interaction.reply({
-        embeds: [
-            new MessageEmbed().setColor('#ff423c').setDescription(message),
-        ],
-        ephemeral: true
-    })
 }
 
 module.exports = button;

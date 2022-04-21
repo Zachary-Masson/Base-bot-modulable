@@ -1,5 +1,5 @@
 const {Button, InteractionsOptions} = require('../../../libs/core')
-const {ButtonInteraction, MessageEmbed, MessageActionRow} = require('discord.js');
+const {ButtonInteraction, MessageEmbed} = require('discord.js');
 
 const button = new Button({
     custom_id: "close-ticket",
@@ -34,15 +34,6 @@ const setupDatabase = (databaseModel, db) => {
 const saveData = (databaseModel, db) => {
     databaseModel.database = db;
     databaseModel.save();
-}
-
-const sendError = (interaction, message) => {
-    interaction.reply({
-        embeds: [
-            new MessageEmbed().setColor('#ff423c').setDescription(message),
-        ],
-        ephemeral: true
-    })
 }
 
 module.exports = button;

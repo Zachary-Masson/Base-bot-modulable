@@ -1,4 +1,4 @@
-const {Command, InteractionsOptions} = require('../../../libs/core');
+const {Command, InteractionsOptions, InteractionError} = require('../../../libs/core');
 const {CommandInteraction, MessageEmbed} = require('discord.js');
 
 const command = new Command({
@@ -27,22 +27,13 @@ const command = new Command({
 command.execute = (options, interaction) => {
     const member = interaction.options.getMember('member');
     const reason = interaction.options.getString('reason');
-    if (member.permissions.has(command.commandData.permission)) return sendError(interaction,'The member cannot be kicked !');
+    if (member.permissions.has(command.commandData.permission)) return InteractionError(interaction,'The member cannot be kicked !');
     member.kick();
     interaction.reply({
         embeds: [
             new MessageEmbed().setColor('#4163ff').setDescription(`**__${member.user.tag}__** was kicked by **__${interaction.member.user.tag}__**`).addField('Reason', reason ? reason : "unspecified").setTimestamp()
         ]
     })
-}
-
-const sendError = (interaction, message) => {
-    interaction.reply({
-        embeds: [
-            new MessageEmbed().setColor('#ff423c').setDescription(message),
-        ],
-        ephemeral: true
-    })
-}
+};
 
 module.exports = command;

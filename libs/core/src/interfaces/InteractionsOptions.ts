@@ -1,8 +1,9 @@
 const {Client} = require('discord.js');
+import {Database} from "../../../Database-dev/";
 
 export interface InteractionsOptions {
     config: object,
     events: object,
     client: Client,
-    databaseModel: object
+    databaseModel: Database
 }

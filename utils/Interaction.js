@@ -1,4 +1,5 @@
-const { Client, Permissions, MessageEmbed } = require('discord.js')
+const {InteractionError} = require('../libs/core');
+const { Client } = require('discord.js');
 
 class Interaction {
     /**
@@ -44,15 +45,15 @@ class Interaction {
     async Commands(interaction) {
         const {commandName} = interaction;
         const commandSearch = this._client.interaction.commands.filter(cmd => cmd.commandData.name === commandName)[0];
-        if (!commandSearch) return this.sendError(interaction, "The commands is available !");
+        if (!commandSearch) return InteractionError(interaction, "The commands is available !");
         const {commandData, execute} = commandSearch;
         if (commandData['permission']) {
             if (!isNaN(parseInt(commandData['permission']))) {
-                if (interaction.guild.roles.resolve(commandData['permission']) === null) return this.sendError(interaction, 'An error has occurred, please contact support with the error code : "fx05233"');
-                if (interaction.member.roles.resolve(commandData['permission']) === null) return this.sendError(interaction, "You don't have permissions !")
+                if (interaction.guild.roles.resolve(commandData['permission']) === null) return InteractionError(interaction, 'An error has occurred, please contact support with the error code : "fx05233"');
+                if (interaction.member.roles.resolve(commandData['permission']) === null) return InteractionError(interaction, "You don't have permissions !")
             }
             else {
-                if (!interaction.member.permissions.has(commandData['permission'])) return this.sendError(interaction, "You don't have permissions !")
+                if (!interaction.member.permissions.has(commandData['permission'])) return InteractionError(interaction, "You don't have permissions !")
             }
         }
         execute({
@@ -67,7 +68,7 @@ class Interaction {
         const {customId} = interaction;
         const buttonID = customId.split('#')[0];
         const buttonSearch = this._client.interaction.buttons.filter(btn => btn.buttonData.custom_id === buttonID)[0];
-        if (!buttonSearch) return this.sendError(interaction, "The button is available !");
+        if (!buttonSearch) return InteractionError(interaction, "The button is available !");
         const {buttonData, execute} = buttonSearch;
         execute({
             config: buttonData['modulesParent'] ? this._modules.filter(data => data.tag === buttonData.modulesParent)[0].config : {},
@@ -81,14 +82,6 @@ class Interaction {
 
     }
 
-    sendError(interaction, message) {
-        interaction.reply({
-            embeds: [
-                new MessageEmbed().setColor('#ff423c').setDescription(message)
-            ],
-            ephemeral: true
-        })
-    }
 }
 
 module.exports = Interaction;

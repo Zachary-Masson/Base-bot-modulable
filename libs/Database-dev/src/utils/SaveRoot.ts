@@ -1,7 +1,7 @@
-const {writeFileSync} = require('fs');
-const {verifyFile, getPath, getRoute} = require('./rootData')
+import {writeFileSync} from "fs";
+import {verifyFile, getPath, getRoute} from "./RootData";
 
-module.exports = async (path) => {
+export default async (path: string) => {
     if (!verifyFile()) {
         writeFileSync(getPath(), JSON.stringify({root: path}))
     }
