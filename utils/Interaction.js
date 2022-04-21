@@ -44,7 +44,7 @@ class Interaction {
 
     async Commands(interaction) {
         const {commandName} = interaction;
-        const commandSearch = this._client.interaction.commands.filter(cmd => cmd.commandData.name === commandName)[0];
+        const commandSearch = this._client.interactions.commands.filter(cmd => cmd.commandData.name === commandName)[0];
         if (!commandSearch) return InteractionError(interaction, "The commands is available !");
         const {commandData, execute} = commandSearch;
         if (commandData['permission']) {
@@ -67,7 +67,7 @@ class Interaction {
     Buttons(interaction) {
         const {customId} = interaction;
         const buttonID = customId.split('#')[0];
-        const buttonSearch = this._client.interaction.buttons.filter(btn => btn.buttonData.custom_id === buttonID)[0];
+        const buttonSearch = this._client.interactions.buttons.filter(btn => btn.buttonData.custom_id === buttonID)[0];
         if (!buttonSearch) return InteractionError(interaction, "The button is available !");
         const {buttonData, execute} = buttonSearch;
         execute({

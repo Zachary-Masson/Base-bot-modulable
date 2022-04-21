@@ -5,6 +5,4 @@ const Events = new events();
 const DataBaseModel = new Database({
     root: `${__dirname}/database.json`
 });
-
-
 const client = new Client(Events, DataBaseModel);

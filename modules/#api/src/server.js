@@ -1,12 +1,13 @@
 const Debug = require('../../../utils/development/Debug');
-const { EventsReadyOptions } = require('../../../libs/core')
+const { EventsReadyOptions, Event } = require('../../../libs/core')
 const { Client } = require('discord.js');
+const event = new Event('ready');
 
 /**
  * @param {EventsReadyOptions} options
  * @param {Client} client
  */
-module.exports = (options, client) => {
+event.execute = (options, client) => {
     setDatabase(options.databaseModel)
     const express = require('express');
     const bodyParser = require('body-parser');
@@ -70,3 +71,5 @@ const saveData = (databaseModel, db) => {
     databaseModel.database = db;
     databaseModel.save();
 }
+
+module.exports = event;

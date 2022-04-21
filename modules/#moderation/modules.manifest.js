@@ -1,4 +1,5 @@
-const ModulesManifest = {
+const {ModulesManifest} = require('../../libs/core');
+module.exports = new ModulesManifest({
     name: "Moderation",
     tag: "#moderation",
     config: require('./config.json'),
@@ -9,6 +10,4 @@ const ModulesManifest = {
             require('./commands/say')
         ]
     }
-}
-
-module.exports = ModulesManifest
+});
