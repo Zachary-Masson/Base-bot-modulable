@@ -184,7 +184,7 @@ class ModulesClass {
     async addNewPackages() {
         const packages = [];
         const allPackages = [];
-        let finalLineCommandsInstall = "pnpm add"
+        let finalLineCommandsInstall = "npm i"
         await this._modules.map(module => {
             if (!module['packages']) return false;
             module.packages.map(pkg => {
@@ -196,7 +196,7 @@ class ModulesClass {
         packages.map(pkg => {
             if (!this.verifyInstallPackage(pkg)) return finalLineCommandsInstall += ` ${pkg}`
         })
-        if (finalLineCommandsInstall !== "pnpm add") await execSync(finalLineCommandsInstall, {cwd: process.mainModule.path});
+        if (finalLineCommandsInstall !== "npm i") await execSync(finalLineCommandsInstall, {cwd: process.mainModule.path});
         this.cleanPackageJson(allPackages);
     }
 
@@ -205,14 +205,14 @@ class ModulesClass {
     }
 
     cleanPackageJson(packages) {
-        let finalLineCommandsInstall = "pnpm remove"
+        let finalLineCommandsInstall = "npm remove"
         const packagesDefault = ['@discordjs/rest', 'discord-api-types', 'discord.js', 'dotenv'];
         Object.keys(packagesJson.dependencies).map(pkg => {
             if (packagesDefault.includes(pkg)) return;
             if (packages.includes(pkg)) return;
             return finalLineCommandsInstall += ` ${pkg}`;
         })
-        if (finalLineCommandsInstall === "pnpm remove") return;
+        if (finalLineCommandsInstall === "npm remove") return;
         execSync(finalLineCommandsInstall, {cwd: process.mainModule.path})
     }
 }
