@@ -1,27 +1,13 @@
 import {ModulesManifestOptions} from "./ModulesManifestOptions";
-import {CommandData} from "./CommandData";
-import {ButtonData} from "./ButtonData";
+import {Event} from "../utils/Event";
+import {Command} from "../utils/Command";
+import {Button} from "../utils/Button";
+import {Route} from "../../../api";
 
 export interface CoreOptions {
-    Modules: [
-        ModulesManifestOptions
-    ],
-    Events: [
-        {
-            eventType: string,
-            execute: void
-        }
-    ],
-    Commands: [
-        {
-            commandData: CommandData,
-            execute: void
-        }
-    ],
-    Buttons: [
-        {
-            buttonData: ButtonData,
-            execute: void
-        }
-    ]
+    Modules: [ModulesManifestOptions],
+    Events: [Event],
+    Commands: [Command],
+    Buttons: [Button],
+    Api: [Route]
 }

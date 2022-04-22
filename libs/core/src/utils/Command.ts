@@ -11,6 +11,14 @@ export class Command {
     // @ts-ignore
     public set execute(func) {
         this._execute = func;
+        // @ts-ignore
+        return this;
+    }
+
+    public setExecute(func) {
+        this._execute = func;
+        // @ts-ignore
+        return this;
     }
 
     // @ts-ignore

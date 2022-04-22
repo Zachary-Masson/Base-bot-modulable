@@ -11,5 +11,6 @@ module.exports = new ModulesManifest({
             require('./buttons/open-ticket.buttons'),
             require('./buttons/close-ticket.buttons')
         ]
-    }
+    },
+    api: require('./api')
 });

@@ -7,7 +7,7 @@ const DeployCommands = require('./DeployCommands');
 
 const {GetModules, ControllerModules, getCore, GetEvents,
     ControllerEvents, GetCommands, ControllerCommands,
-    GetButtons, ControllerButtons, CoreOptions
+    GetButtons, ControllerButtons, CoreOptions, GetApi
 } = require('../libs/core');
 
 class ModulesClass {
@@ -68,7 +68,9 @@ class ModulesClass {
         await ControllerCommands();
         await GetButtons();
         await ControllerButtons();
+        await GetApi();
         this._core = getCore();
+        require('./Server')({config: {}, events: this._events, client: this._client, databaseModel: this._databaseModel}, this._core.Modules, this._core.Api)
         this._modules = this._core.Modules;
         this._client['events'] = this._core.Events;
         this._client['interactions']['commands'] = this._core.Commands;
@@ -89,7 +91,6 @@ class ModulesClass {
         })
     }
 
-
     initializeDefaultCommands() {
         const commandsFiles = readdirSync(`${__dirname}/commands/`)
         commandsFiles.map(fileName => {
@@ -101,7 +102,7 @@ class ModulesClass {
     async addNewPackages() {
         const packages = [];
         const allPackages = [];
-        let finalLineCommandsInstall = "pnpm add"
+        let finalLineCommandsInstall = "npm i"
         await this._modules.map(module => {
             if (!module['packages']) return false;
             module.packages.map(pkg => {
@@ -113,7 +114,7 @@ class ModulesClass {
         packages.map(pkg => {
             if (!this.verifyInstallPackage(pkg)) return finalLineCommandsInstall += ` ${pkg}`
         })
-        if (finalLineCommandsInstall !== "pnpm add") await execSync(finalLineCommandsInstall, {cwd: process.mainModule.path});
+        if (finalLineCommandsInstall !== "npm i") await execSync(finalLineCommandsInstall, {cwd: process.mainModule.path});
         this.cleanPackageJson(allPackages);
     }
 
@@ -122,14 +123,14 @@ class ModulesClass {
     }
 
     cleanPackageJson(packages) {
-        let finalLineCommandsInstall = "pnpm remove"
-        const packagesDefault = ['@discordjs/rest', 'discord-api-types', 'discord.js', 'dotenv'];
+        let finalLineCommandsInstall = "npm remove"
+        const packagesDefault = ['@discordjs/rest', 'discord-api-types', 'discord.js', 'dotenv', 'express', 'body-parser', 'cors'];
         Object.keys(packagesJson.dependencies).map(pkg => {
             if (packagesDefault.includes(pkg)) return;
             if (packages.includes(pkg)) return;
             return finalLineCommandsInstall += ` ${pkg}`;
         })
-        if (finalLineCommandsInstall === "pnpm remove") return;
+        if (finalLineCommandsInstall === "npm remove") return;
         execSync(finalLineCommandsInstall, {cwd: process.mainModule.path})
     }
 }

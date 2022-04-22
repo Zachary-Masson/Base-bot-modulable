@@ -6,7 +6,8 @@ const Core = {
     Modules: [],
     Events: [],
     Commands: [],
-    Buttons: []
+    Buttons: [],
+    Api: [],
 }
 
 export const GetModules = async () => {
@@ -67,6 +68,16 @@ export const GetButtons = async () => {
         })
     })
     Core.Buttons = Buttons;
+}
+
+export const GetApi = async () => {
+    const Api = new Array();
+    await Core.Modules.map(module => {
+        if (!module['api']) return;
+        module['api']['modulesParent'] = module.name;
+        Api.push(module['api'])
+    })
+    Core.Api = Api;
 }
 
 export const ControllerEvents = async () => {

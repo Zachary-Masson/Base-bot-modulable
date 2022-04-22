@@ -36,13 +36,13 @@ class Interaction {
 
     main() {
         this._client.on('interactionCreate', (interaction) => {
-            if (interaction.isCommand()) return this.Commands(interaction);
-            if (interaction.isButton()) return this.Buttons(interaction);
+            if (interaction.isCommand()) return this.Command(interaction);
+            if (interaction.isButton()) return this.Button(interaction);
             if (interaction.isSelectMenu()) return this.SelectMenu(interaction);
         })
     }
 
-    async Commands(interaction) {
+    Command(interaction) {
         const {commandName} = interaction;
         const commandSearch = this._client.interactions.commands.filter(cmd => cmd.commandData.name === commandName)[0];
         if (!commandSearch) return InteractionError(interaction, "The commands is available !");
@@ -64,7 +64,7 @@ class Interaction {
         }, interaction);
     }
 
-    Buttons(interaction) {
+    Button(interaction) {
         const {customId} = interaction;
         const buttonID = customId.split('#')[0];
         const buttonSearch = this._client.interactions.buttons.filter(btn => btn.buttonData.custom_id === buttonID)[0];

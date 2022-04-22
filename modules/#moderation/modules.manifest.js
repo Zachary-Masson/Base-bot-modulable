@@ -9,5 +9,5 @@ module.exports = new ModulesManifest({
             require('./commands/kick'),
             require('./commands/say')
         ]
-    }
+    },
 });
