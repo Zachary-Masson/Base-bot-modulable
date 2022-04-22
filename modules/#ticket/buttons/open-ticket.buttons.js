@@ -1,127 +1,74 @@
-const {Client, Interaction, MessageButton, MessageEmbed, MessageActionRow} = require('discord.js');
-const databaseModel = require('../../../libs/Database-dev');
-const buttonClose = require('./close-ticket.buttons');
+const {Button, InteractionsOptions, InteractionError} = require('../../../libs/core')
+const {ButtonInteraction, MessageEmbed, MessageActionRow} = require('discord.js');
+const ButtonClose = require('./close-ticket.buttons');
 
-const data = {
+const button = new Button({
     custom_id: "open-ticket",
     style: "SECONDARY",
     label: "Open a Ticket",
     emoji: "📩"
+})
+
+/**
+ * @param {InteractionsOptions} options
+ * @param {ButtonInteraction} interaction
+ */
+button.execute = async (options, interaction) => {
+    const db = options.databaseModel.database;
+    setupDatabase(options.databaseModel, db);
+    if (db['#ticket']['tickets'][0] && db['#ticket']['tickets'].filter(ticket => ticket.userID === interaction.user.id).length >= options.config.ticket.maxTicketOpen) return InteractionError(interaction, `you already have ${options.config.ticket.maxTicketOpen} open tickets !`);
+    const channel = await interaction.guild.channels.create(options.config.ticket.name.replaceAll('{{ user.username }}', interaction.user.username), {
+        parent: options.config.ticket.parent,
+        topic: options.config.ticket.topic.replaceAll('{{ user.id }}', interaction.user.id),
+        permissionOverwrites: [
+            {
+                deny: "VIEW_CHANNEL",
+                id: options.config.ticket.roles.member
+            },
+            {
+                allow: "VIEW_CHANNEL",
+                id: interaction.user.id
+            },
+            {
+                allow: "VIEW_CHANNEL",
+                id: options.config.ticket.roles.support
+            }
+        ]
+    })
+
+    db['#ticket']['tickets'].push({
+        userID: interaction.user.id,
+        channelID: channel.id
+    })
+
+    saveData(options.databaseModel, db);
+
+    channel.send({
+        embeds: [
+            new MessageEmbed().setColor(options.config.colorEmbed).setDescription(options.config.ticket.firstMessage)
+        ],
+        components: [
+            new MessageActionRow().addComponents(ButtonClose.button)
+        ]
+    })
+
+    interaction.reply({
+        embeds: [
+            new MessageEmbed().setColor(options.config.colorEmbed).setDescription(`Your ticket is create ${channel}`)
+        ],
+        ephemeral: true
+    })
 }
 
-const getButton = new MessageButton().setCustomId(data.custom_id).setStyle(data.style).setLabel(data.label).setEmoji(data.emoji);
-
-class Button {
-    /**
-     * @type {Object}
-     * @private
-     */
-    _config;
-    /**
-     * @type {module:events.EventEmitter}
-     * @private
-     */
-    _events;
-    /**
-     * @type {Client}
-     * @private
-     */
-    _client;
-    /**
-     * @type {Interaction}
-     * @private
-     */
-    _interaction;
-    /**
-     * @type {databaseModel}
-     * @private
-     */
-    _databaseModel;
-
-    /**
-     * @param {Object} config
-     * @param {module:events.EventEmitter} events
-     * @param {Client} client
-     * @param {Interaction} interaction
-     * @param {databaseModel} databaseModel
-     */
-    constructor(config, events, client, interaction, databaseModel) {
-        this._config = config;
-        this._events = events;
-        this._client = client;
-        this._interaction = interaction;
-        this._databaseModel = databaseModel;
-        this.main();
-    }
-
-    async main() {
-        const db = this._databaseModel.database;
-        this.setupDatabase(db);
-        if (db['#ticket']['tickets'][0] && db['#ticket']['tickets'].filter(ticket => ticket.userID === this._interaction.user.id).length >= this._config.ticket.maxTicketOpen) return this.sendError(`you already have ${this._config.ticket.maxTicketOpen} open tickets !`);
-        const channel = await this._interaction.guild.channels.create(this._config.ticket.name.replaceAll('{{ user.username }}', this._interaction.user.username), {
-            parent: this._config.ticket.parent,
-            topic: this._config.ticket.topic.replaceAll('{{ user.id }}', this._interaction.user.id),
-            permissionOverwrites: [
-                {
-                    deny: "VIEW_CHANNEL",
-                    id: this._config.ticket.roles.member
-                },
-                {
-                    allow: "VIEW_CHANNEL",
-                    id: this._interaction.user.id
-                },
-                {
-                    allow: "VIEW_CHANNEL",
-                    id: this._config.ticket.roles.support
-                }
-            ]
-        })
-
-        db['#ticket']['tickets'].push({
-            userID: this._interaction.user.id,
-            channelID: channel.id
-        })
-
-        this.saveData(db);
-
-        channel.send({
-            embeds: [
-                new MessageEmbed().setColor(this._config.colorEmbed).setDescription(this._config.ticket.firstMessage)
-            ],
-            components: [
-                new MessageActionRow().addComponents(buttonClose.getButton)
-            ]
-        })
-
-        this._interaction.reply({
-            embeds: [
-                new MessageEmbed().setColor(this._config.colorEmbed).setDescription(`Your ticket is create ${channel}`)
-            ],
-            ephemeral: true
-        })
-    }
-
-    sendError(message) {
-        this._interaction.reply({
-            embeds: [
-                new MessageEmbed().setColor('#ff423c').setDescription(message),
-            ],
-            ephemeral: true
-        })
-    }
-
-    setupDatabase(db) {
-        if (!db['#ticket']) db['#ticket'] = {};
-        if (!db['#ticket']['tickets']) db['#ticket']['tickets'] = [];
-        this.saveData(db);
-    }
-
-    saveData(db) {
-        this._databaseModel.database = db;
-        this._databaseModel.save();
-    }
+const setupDatabase = (databaseModel, db) => {
+    if (!db['#ticket']) db['#ticket'] = {};
+    if (!db['#ticket']['tickets']) db['#ticket']['tickets'] = [];
+    saveData(databaseModel, db);
 }
 
-exports.Data = data;
-exports.getButton = getButton;
-exports.Button = (config, events, client, interaction, databaseModel) => new Button(config, events, client, interaction, databaseModel);
+const saveData = (databaseModel, db) => {
+    databaseModel.database = db;
+    databaseModel.save();
+}
+
+module.exports = button;

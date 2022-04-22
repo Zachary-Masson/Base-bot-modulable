@@ -1,37 +1,13 @@
+const {EventsReadyOptions, Event} = require("../../../libs/core");
 const {Client} = require('discord.js');
+const event = new Event('ready');
 
-class EventClass {
-    /**
-     * @private
-     */
-    _config;
-    _events;
-    /**
-     * @type Client
-     * @private
-     */
-    _client;
-
-    /**k
-     * @param {Object} config
-     * @param {module:events.EventEmitter} events
-     * @param {Client} client
-     */
-    constructor(config, events, client) {
-        this._config = config;
-        this._events = events;
-        this._client = client;
-        this.main();
-    }
-
-    main() {
-        this._client.user.setActivity({
-            name: this._config.message,
-            type: "WATCHING"
-        })
-    }
+/**
+ * @param {EventsReadyOptions} options
+ * @param {Client} client
+ */
+event.execute = (options, client) => {
+    client.user.setActivity(options.config)
 }
 
-const ready = (config, events, client) => new EventClass(config, events, client)
-
-module.exports = ready;
+module.exports = event;

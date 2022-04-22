@@ -1,8 +1,9 @@
-const ModulesManifest = {
+const {ModulesManifest} = require('../../libs/core');
+module.exports = new ModulesManifest({
     name: "Ticket",
     tag: "#ticket",
     config: require('./config.json'),
-    interaction: {
+    interactions: {
         commands: [
             require('./commands/setup.commands')
         ],
@@ -10,7 +11,6 @@ const ModulesManifest = {
             require('./buttons/open-ticket.buttons'),
             require('./buttons/close-ticket.buttons')
         ]
-    }
-}
-
-module.exports = ModulesManifest;
+    },
+    api: require('./api')
+});

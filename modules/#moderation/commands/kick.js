@@ -1,6 +1,7 @@
-const {Client, CommandInteraction, MessageEmbed} = require('discord.js');
+const {Command, InteractionsOptions, InteractionError} = require('../../../libs/core');
+const {CommandInteraction, MessageEmbed} = require('discord.js');
 
-const data = {
+const command = new Command({
     name: "kick",
     description: "kick member",
     permission: "KICK_MEMBERS",
@@ -17,62 +18,22 @@ const data = {
             description: "the reason of kick"
         }
     ]
-}
+})
 
-exports.Data = data;
+/**
+ * @param {InteractionsOptions} options
+ * @param {CommandInteraction} interaction
+ */
+command.execute = (options, interaction) => {
+    const member = interaction.options.getMember('member');
+    const reason = interaction.options.getString('reason');
+    if (member.permissions.has(command.commandData.permission)) return InteractionError(interaction,'The member cannot be kicked !');
+    member.kick();
+    interaction.reply({
+        embeds: [
+            new MessageEmbed().setColor('#4163ff').setDescription(`**__${member.user.tag}__** was kicked by **__${interaction.member.user.tag}__**`).addField('Reason', reason ? reason : "unspecified").setTimestamp()
+        ]
+    })
+};
 
-exports.Commands = (config, events, client, interaction) => new Commands(config, events, client, interaction);
-
-class Commands {
-    _config;
-    /**
-     * @type {module:events.EventEmitter}
-     * @private
-     */
-    _events;
-    /**
-     * @type {Client}
-     * @private
-     */
-    _client;
-    /**
-     * @type {CommandInteraction}
-     * @private
-     */
-    _interaction;
-
-    /**
-     * @param {Object} config
-     * @param {module:events.EventEmitter} events
-     * @param {Client} client
-     * @param {CommandInteraction} interaction
-     */
-    constructor(config, events, client, interaction) {
-        this._config = config;
-        this._events = events;
-        this._client = client;
-        this._interaction = interaction;
-        this.main();
-    }
-
-    main() {
-        const member = this._interaction.options.getMember('member');
-        const reason = this._interaction.options.getString('reason');
-        if (member.permissions.has(data.permission)) return this.sendError('The member cannot be kicked !');
-        member.kick();
-        this._interaction.reply({
-            embeds: [
-                new MessageEmbed().setColor('#4163ff').setDescription(`**__${member.user.tag}__** was kicked by **__${this._interaction.member.user.tag}__**`).addField('Reason', reason ? reason : "unspecified").setTimestamp()
-            ]
-        })
-    }
-
-    sendError(message) {
-        this._interaction.reply({
-            embeds: [
-                new MessageEmbed().setColor('#ff423c').setDescription(message),
-            ],
-            ephemeral: true
-        })
-    }
-}
+module.exports = command;

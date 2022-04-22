@@ -1,6 +1,7 @@
-const {Client, CommandInteraction, MessageEmbed} = require('discord.js');
+const {Command, InteractionsOptions} = require('../../../libs/core');
+const {CommandInteraction, MessageEmbed} = require('discord.js');
 
-const data = {
+const command = new Command({
     name: "say",
     description: "send your message",
     permission: "MANAGE_MESSAGES", // or role ID
@@ -28,59 +29,28 @@ const data = {
             required: true
         }
     ]
+})
+
+/**
+ * @param {InteractionsOptions} options
+ * @param {CommandInteraction} interaction
+ */
+command.execute = (options, interaction) => {
+    const message = interaction.options.getString('message');
+    const inEmbed = interaction.options.getString('embed');
+    if (inEmbed === "true") {
+        interaction.channel.send({
+            embeds: [
+                new MessageEmbed().setColor('#8dff71').setDescription(message)
+            ]
+        });
+    } else {
+        interaction.channel.send(message);
+    }
+    interaction.reply({
+        content: 'message sent',
+        ephemeral: true
+    })
 }
 
-exports.Data = data;
-
-exports.Commands = (config, events, client, interaction) => new Commands(config, events, client, interaction);
-
-class Commands {
-    _config;
-    /**
-     * @type {module:events.EventEmitter}
-     * @private
-     */
-    _events;
-    /**
-     * @type {Client}
-     * @private
-     */
-    _client;
-    /**
-     * @type {CommandInteraction}
-     * @private
-     */
-    _interaction;
-
-    /**
-     * @param {Object} config
-     * @param {module:events.EventEmitter} events
-     * @param {Client} client
-     * @param {CommandInteraction} interaction
-     */
-    constructor(config, events, client, interaction) {
-        this._config = config;
-        this._events = events;
-        this._client = client;
-        this._interaction = interaction;
-        this.main();
-    }
-
-    main() {
-        const message = this._interaction.options.getString('message');
-        const inEmbed = this._interaction.options.getString('embed');
-        if (inEmbed === "true") {
-            this._interaction.channel.send({
-                embeds: [
-                    new MessageEmbed().setColor('#8dff71').setDescription(message)
-                ]
-            });
-        } else {
-            this._interaction.channel.send(message);
-        }
-        this._interaction.reply({
-            content: 'message sent',
-            ephemeral: true
-        })
-    }
-}
+module.exports = command;

@@ -1,15 +1,9 @@
-const ModulesManifest = {
-    name: "MessageStatus",
+const {ModulesManifest} = require('../../libs/core');
+module.exports = new ModulesManifest({
+    name: "messageStatus",
     tag: "#messageStatus",
     config: require('./config.json'),
     events: [
-        {
-            type: "ready",
-            functions: [
-                require('./events/ready')
-            ]
-        }
+        require('./events/ready')
     ]
-}
-
-module.exports = ModulesManifest;
+});

@@ -2,12 +2,12 @@
   "colorEmbed": "#4163ff",
   "ticket": {
     "name": "{{ user.username }} Ticket",
-    "parent": "965654954704523284",
+    "parent": "966537098201010238",
     "topic": "{{ user.id }}",
     "firstMessage": "Welcome to your ticket, a support will take care of you as soon as possible !",
     "roles": {
-      "support": "958451832202625068",
-      "member": "965260573346516992"
+      "support": "966382875429724170",
+      "member": "966382824267591820"
     },
     "maxTicketOpen": 3,
     "timeBeforeDeletion": 5

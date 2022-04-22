@@ -1,14 +1,13 @@
-const ModulesManifest = {
+const {ModulesManifest} = require('../../libs/core');
+module.exports = new ModulesManifest({
     name: "Moderation",
     tag: "#moderation",
     config: require('./config.json'),
-    interaction: {
+    interactions: {
         commands: [
-            require('./commands/say'),
             require('./commands/ban'),
-            require('./commands/kick')
+            require('./commands/kick'),
+            require('./commands/say')
         ]
-    }
-}
-
-module.exports = ModulesManifest
+    },
+});
