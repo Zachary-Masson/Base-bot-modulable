@@ -10,6 +10,7 @@ const routeTicket = new Route('/ticket');
 routeTicket.get('/all', {}, (options, req, res) => {
     res.json(options.databaseModel.database['#ticket']['tickets'])
 })
+
 routeTicket.get('/one/:memberID', {}, (options, req, res) => {
     res.json(options.databaseModel.database['#ticket']['tickets'].filter(ticket => ticket.userID === req.params.memberID))
 })

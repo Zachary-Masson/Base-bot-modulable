@@ -3,7 +3,7 @@ require('dotenv').config()
 const events = require('events');
 
 const { Client, Intents } = require("discord.js");
-const Debug = require('./development/Debug');
+const {debug} = require("../libs/debug");
 const Modules = require('./Modules');
 const ModulesClass = require("./Modules");
 
@@ -18,11 +18,6 @@ class ClientClass {
      * @private
      */
     _events;
-    /**
-     * @type Debug
-     * @private
-     */
-    _debug;
     _databaseModel;
 
     /**
@@ -30,7 +25,6 @@ class ClientClass {
      */
     constructor(Events, databaseModel) {
         this._events = Events
-        this._debug = new Debug();
         this._databaseModel = databaseModel;
         this.main();
     }
@@ -61,10 +55,8 @@ class ClientClass {
      */
     async launch() {
         await this._client.login(process.env.BOT_TOKEN);
-        this._debug.message = "Application";
-        this._debug.createCategory();
-        this._debug.message = this._debug.config["debug.launch_application"].message.replace('{{ client.tag }}', this._client.user.tag);
-        this._debug.create('launch_application');
+        debug({type: "title"}, "Client");
+        debug({type: "success", replaces: [{String: "{{ clientTag }}", data: `${this._client.user.username}$→#$${this._client.user.discriminator}`}]}, "{{ clientTag }} is $→connected$ !")
     }
 
     // setters

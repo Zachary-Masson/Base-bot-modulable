@@ -1,4 +1,5 @@
 import { existsSync, readdirSync } from 'fs';
+import { xterm } from 'cli-color';
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
   try {
@@ -100,10 +101,19 @@ var Button = /*#__PURE__*/function () {
   } // @ts-ignore
 
 
+  var _proto = Button.prototype;
+
+  // @ts-ignore
+  _proto.setExecute = function setExecute(func) {
+    this._execute = func; // @ts-ignore
+
+    return this;
+  } // @ts-ignore
+  ;
+
   _createClass(Button, [{
     key: "execute",
-    get: // @ts-ignore
-    function get() {
+    get: function get() {
       return this._execute;
     } // @ts-ignore
     ,
@@ -132,10 +142,19 @@ var Event = /*#__PURE__*/function () {
   } // @ts-ignore
 
 
+  var _proto = Event.prototype;
+
+  // @ts-ignore
+  _proto.setExecute = function setExecute(func) {
+    this._execute = func; // @ts-ignore
+
+    return this;
+  } // @ts-ignore
+  ;
+
   _createClass(Event, [{
     key: "execute",
-    get: // @ts-ignore
-    function get() {
+    get: function get() {
       return this._execute;
     } // @ts-ignore
     ,
@@ -167,19 +186,6 @@ var ModulesManifest = /*#__PURE__*/function () {
 
   return ModulesManifest;
 }();
-
-var _require$1 = /*#__PURE__*/require('discord.js'),
-    MessageEmbed = _require$1.MessageEmbed;
-
-var InteractionError = function InteractionError(interaction, message) {
-  interaction.reply({
-    embeds: [new MessageEmbed().setColor('#ff423c').setDescription(message)],
-    ephemeral: true
-  });
-};
-var ErrorConsole = function ErrorConsole(message) {
-  console.log(message);
-};
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -941,8 +947,97 @@ try {
 }
 });
 
-var _require$2 = /*#__PURE__*/require('discord.js'),
-    Permissions = _require$2.Permissions;
+var Type = {
+  error: 124,
+  success: 82,
+  actions: 22,
+  modules: 18,
+  module: 171,
+  api: 184,
+  title: 21
+};
+
+var VerifyTypeExist = function VerifyTypeExist(type) {
+  // @ts-ignore
+  return !!Type[type];
+};
+
+var ReturnColor = function ReturnColor(type) {
+  // @ts-ignore
+  return Type[type];
+};
+
+var sendDebug = function sendDebug(message) {
+  console.log(message);
+};
+
+var SetColor = function SetColor(String, color) {
+  var Text = String;
+  var part = String.split('$');
+  part.map(function (p) {
+    if (p.startsWith('→')) {
+      var text = p.slice(1, p.length);
+      Text = Text.replace("$" + p + "$", xterm(color)(text));
+    }
+  });
+  return Text;
+};
+
+var sendError = function sendError(message) {
+  var title = "     [$→ERROR$]";
+  sendDebug(SetColor(title + " " + message, 124));
+};
+
+var DebugSuccess = function DebugSuccess(message) {
+  var title = "     [$→SUCCESS$]";
+  sendDebug(SetColor(title + " " + message, ReturnColor('success')));
+};
+
+var DebugActions = function DebugActions(message) {
+  var title = "     [$→ACTIONS$]";
+  sendDebug(SetColor(title + " " + message, ReturnColor('actions')));
+};
+
+var DebugModules = function DebugModules(message, moduleName) {
+  var title = "     [$\u2192MODULES$] ($\u2192" + moduleName + "$)";
+  sendDebug(SetColor(title + " " + message, ReturnColor('modules')));
+};
+
+var DebugModule = function DebugModule(message, moduleName) {
+  var title = "     [$\u2192MODULE$] ($\u2192" + moduleName + "$)";
+  sendDebug(SetColor(title + " " + message, ReturnColor('module')));
+};
+
+var DebugApi = function DebugApi(message) {
+  var title = "     [$\u2192API$]";
+  sendDebug(SetColor(title + " " + message, ReturnColor('api')));
+};
+
+var DebugTitle = function DebugTitle(title) {
+  sendDebug(SetColor("\n   $\u2192" + title + " \u2192$", ReturnColor('title')));
+};
+
+var debug = function debug(options, message) {
+  var Message = message;
+  if (!VerifyTypeExist(options.type)) return sendError("($\u2192" + options.type + "$) does exits !");
+
+  if (options["replaces"] && options["replaces"][0]) {
+    options["replaces"].map(function (meta) {
+      Message = Message.replace(meta.String, meta.data === "moduleName" ? options['module'] ? options['module'] : "undefined" : meta.data);
+    });
+  }
+
+  if (options.type === "error") return sendError(Message);
+  if (options.type === "success") return DebugSuccess(Message);
+  if (options.type === "actions") return DebugActions(Message);
+  if (options.type === "api") return DebugApi(Message);
+  if (options.type === "title") return DebugTitle(Message);
+  if (options.type === "modules") return DebugModules(Message, options['module'] ? options['module'] : 'undefined');
+  if (options.type === "module") return DebugModule(Message, options['module'] ? options['module'] : 'undefined');
+};
+
+var _require$1 = /*#__PURE__*/require('discord.js'),
+    Permissions = _require$1.Permissions;
 var Core = {
   Modules: [],
   Events: [],
@@ -958,23 +1053,32 @@ var GetModules = /*#__PURE__*/function () {
         switch (_context.prev = _context.next) {
           case 0:
             Modules = new Array();
-            _context.next = 3;
+            debug({
+              type: "title"
+            }, "Modules");
+            _context.next = 4;
             return readdirSync(process.mainModule.path + "/modules").filter(function (folderName) {
               return folderName.startsWith('#');
             });
 
-          case 3:
+          case 4:
             ModulesFolders = _context.sent;
-            _context.next = 6;
+            _context.next = 7;
             return ModulesFolders.map(function (folderName) {
-              if (!existsSync(process.mainModule.path + "/modules/" + folderName + "/modules.manifest.js")) return ErrorConsole("\"modules.manifest.js\" does exist in " + folderName);
-              Modules.push(require(process.mainModule.path + "/modules/" + folderName + "/modules.manifest.js").manifest);
+              if (!existsSync(process.mainModule.path + "/modules/" + folderName + "/modules.manifest.js")) return debug({
+                type: "error"
+              }, "\"$\u2192modules.manifest.js$\" does $\u2192exist$ in $\u2192" + folderName + "$");
+
+              var Module = require(process.mainModule.path + "/modules/" + folderName + "/modules.manifest.js");
+
+              Module['folderName'] = folderName;
+              Modules.push(Module);
             });
 
-          case 6:
+          case 7:
             Core.Modules = Modules;
 
-          case 7:
+          case 8:
           case "end":
             return _context.stop();
         }
@@ -996,9 +1100,40 @@ var ControllerModules = /*#__PURE__*/function () {
             Modules = new Array();
             _context2.next = 3;
             return Core.Modules.map(function (module) {
-              if (!module['name']) return ErrorConsole('');
-              if (!module['tag']) return ErrorConsole('');
-              Modules.push(module);
+              var manifest = module.manifest;
+              if (!manifest) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleFolderName }}",
+                  data: module['folderName']
+                }]
+              }, "($\u2192{{ moduleFolderName }}$) Missing '$\u2192ModulesManifest$' !");
+              if (!manifest['name']) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleFolderName }}",
+                  data: module['folderName']
+                }]
+              }, "($\u2192{{ moduleFolderName }}$) Missing '$\u2192name$' !");
+              if (!manifest['tag']) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleFolderName }}",
+                  data: module['folderName']
+                }]
+              }, "($\u2192{{ moduleFolderName }}$) Missing '$\u2192tag$' !");
+              if (!manifest['tag'].startsWith('#')) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleFolderName }}",
+                  data: module['folderName']
+                }]
+              }, "($\u2192{{ moduleFolderName }}$) Missing '$\u2192#$' in $\u2192tag$. Exemple : \"$\u2192#$modulesTag\" !");
+              debug({
+                type: "modules",
+                module: manifest.tag
+              }, "is properly $→Controller$ and $→Start$ !");
+              Modules.push(manifest);
             });
 
           case 3:
@@ -1024,7 +1159,10 @@ var GetEvents = /*#__PURE__*/function () {
         switch (_context3.prev = _context3.next) {
           case 0:
             Events = new Array();
-            _context3.next = 3;
+            debug({
+              type: "title"
+            }, "Events");
+            _context3.next = 4;
             return Core.Modules.map(function (module) {
               if (!module['events'] || !module['events'][0]) return;
               module['events'].map(function (e) {
@@ -1033,10 +1171,10 @@ var GetEvents = /*#__PURE__*/function () {
               });
             });
 
-          case 3:
+          case 4:
             Core.Events = Events;
 
-          case 4:
+          case 5:
           case "end":
             return _context3.stop();
         }
@@ -1056,21 +1194,24 @@ var GetCommands = /*#__PURE__*/function () {
         switch (_context4.prev = _context4.next) {
           case 0:
             Commands = new Array();
-            _context4.next = 3;
+            debug({
+              type: "title"
+            }, "Commands");
+            _context4.next = 4;
             return Core.Modules.map(function (module) {
               if (!module['interactions']) return;
               var commands = module['interactions'].commands;
               if (!commands || !commands[0]) return;
               commands.map(function (command) {
-                command.commandData['modulesParent'] = module.tag;
+                command['modulesParent'] = module.tag;
                 Commands.push(command);
               });
             });
 
-          case 3:
+          case 4:
             Core.Commands = Commands;
 
-          case 4:
+          case 5:
           case "end":
             return _context4.stop();
         }
@@ -1090,21 +1231,24 @@ var GetButtons = /*#__PURE__*/function () {
         switch (_context5.prev = _context5.next) {
           case 0:
             Buttons = new Array();
-            _context5.next = 3;
+            debug({
+              type: "title"
+            }, "Buttons");
+            _context5.next = 4;
             return Core.Modules.map(function (module) {
               if (!module['interactions']) return;
               var buttons = module['interactions'].buttons;
               if (!buttons || !buttons[0]) return;
               buttons.map(function (button) {
-                button.buttonData['modulesParent'] = module.tag;
+                button['modulesParent'] = module.tag;
                 Buttons.push(button);
               });
             });
 
-          case 3:
+          case 4:
             Core.Buttons = Buttons;
 
-          case 4:
+          case 5:
           case "end":
             return _context5.stop();
         }
@@ -1158,8 +1302,31 @@ var ControllerEvents = /*#__PURE__*/function () {
             return Core.Events.map(function (event) {
               var eventType = event.eventType,
                   execute = event.execute;
-              if (!eventType) return ErrorConsole('');
-              if (!execute) return ErrorConsole('');
+              if (!eventType) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: event['modulesParent']
+                }]
+              }, "($\u2192{{ moduleTag }}$) Missing '$\u2192eventType$' !");
+              if (!execute) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: event['modulesParent']
+                }, {
+                  String: "{{ eventType }}",
+                  data: eventType
+                }]
+              }, "($\u2192{{ moduleTag }}$) ($\u2192{{ eventType }}$) Missing '$\u2192execute$' !");
+              debug({
+                type: "module",
+                module: event.modulesParent,
+                replaces: [{
+                  String: "{{ eventType }}",
+                  data: eventType
+                }]
+              }, "Event [$→{{ eventType }}$] $→Controller$ and $→Start$ !");
               Events.push(event);
             });
 
@@ -1188,11 +1355,63 @@ var ControllerCommands = /*#__PURE__*/function () {
             Commands = new Array();
             _context8.next = 3;
             return Core.Commands.map(function (command) {
-              var commandData = command.commandData;
-              if (!commandData) return ErrorConsole('');
-              if (!commandData['name']) return ErrorConsole('');
-              if (!commandData['description']) return ErrorConsole('');
-              if (commandData['permission'] && isNaN(parseInt(commandData['permission'])) && !Permissions.FLAGS[commandData['permission']]) return ErrorConsole('');
+              var commandData = command.commandData,
+                  execute = command.execute;
+              if (!commandData) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: command['modulesParent']
+                }]
+              }, "($\u2192{{ moduleTag }}$) Missing '$\u2192commandData$' !");
+              if (!commandData['name']) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: command['modulesParent']
+                }]
+              }, "($\u2192{{ moduleTag }}$) Missing Command '$\u2192name$' !");
+              if (!commandData['description']) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: command['modulesParent']
+                }, {
+                  String: "{{ commandName }}",
+                  data: commandData['name']
+                }]
+              }, "($\u2192{{ moduleTag }}$) ($\u2192{{ commandName }}$) Missing Command '$\u2192description$' !");
+              if (commandData['permission'] && isNaN(parseInt(commandData['permission'])) && !Permissions.FLAGS[commandData['permission']]) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: command['modulesParent']
+                }, {
+                  String: "{{ commandName }}",
+                  data: commandData['name']
+                }, {
+                  String: "{{ commandPermission }}",
+                  data: commandData['permission']
+                }]
+              }, "($\u2192{{ moduleTag }}$) ($\u2192{{ commandName }}$) The $\u2192Permission$ \"$\u2192{{ commandPermission }}$\" is not available !");
+              if (!execute) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: command['modulesParent']
+                }, {
+                  String: "{{ commandName }}",
+                  data: commandData['name']
+                }]
+              }, "($\u2192{{ moduleTag }}$) ($\u2192{{ commandName }}$) Missing Command '$\u2192execute$' !");
+              debug({
+                type: "module",
+                module: command.modulesParent,
+                replaces: [{
+                  String: "{{ commandName }}",
+                  data: commandData['name']
+                }]
+              }, "Command [$→{{ commandName }}$] $→Controller$ and $→Start$ !");
               Commands.push(command);
             });
 
@@ -1221,10 +1440,60 @@ var ControllerButtons = /*#__PURE__*/function () {
             Buttons = new Array();
             _context9.next = 3;
             return Core.Buttons.map(function (button) {
-              var buttonData = button.buttonData;
-              if (!buttonData['custom_id']) return ErrorConsole('');
-              if (!buttonData['style']) return ErrorConsole('');
-              if (!buttonData['label']) return ErrorConsole('');
+              var buttonData = button.buttonData,
+                  execute = button.execute;
+              if (!buttonData) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: button['modulesParent']
+                }]
+              }, "($\u2192{{ moduleTag }}$) Missing Button '$\u2192buttonData$' !");
+              if (!buttonData['custom_id']) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: button['modulesParent']
+                }]
+              }, "($\u2192{{ moduleTag }}$) Missing Button '$\u2192custom_id$' !");
+              if (!buttonData['style']) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: button['modulesParent']
+                }, {
+                  String: "{{ buttonCustomId }}",
+                  data: buttonData['custom_id']
+                }]
+              }, "($\u2192{{ moduleTag }}$) ($\u2192{{ buttonCustomId }}$) Missing Button '$\u2192style$' !");
+              if (!buttonData['label']) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: button['modulesParent']
+                }, {
+                  String: "{{ buttonCustomId }}",
+                  data: buttonData['custom_id']
+                }]
+              }, "($\u2192{{ moduleTag }}$) ($\u2192{{ buttonCustomId }}$) Missing Button '$\u2192label$' !");
+              if (!execute) return debug({
+                type: "error",
+                replaces: [{
+                  String: "{{ moduleTag }}",
+                  data: button['modulesParent']
+                }, {
+                  String: "{{ buttonCustomId }}",
+                  data: buttonData['custom_id']
+                }]
+              }, "($\u2192{{ moduleTag }}$) ($\u2192{{ buttonCustomId }}$) Missing Button '$\u2192execute$' !");
+              debug({
+                type: "module",
+                module: button['modulesParent'],
+                replaces: [{
+                  String: "{{ buttonCustomId }}",
+                  data: buttonData['custom_id']
+                }]
+              }, "Buttons [$→{{ buttonCustomId }}$] $→Controller$ and $→Start$ !");
               Buttons.push(button);
             });
 
@@ -1247,5 +1516,5 @@ var getCore = function getCore() {
   return Core;
 };
 
-export { Button, Command, ControllerButtons, ControllerCommands, ControllerEvents, ControllerModules, ErrorConsole, Event, GetApi, GetButtons, GetCommands, GetEvents, GetModules, InteractionError, ModulesManifest, getCore };
+export { Button, Command, ControllerButtons, ControllerCommands, ControllerEvents, ControllerModules, Event, GetApi, GetButtons, GetCommands, GetEvents, GetModules, ModulesManifest, getCore };
 //# sourceMappingURL=core.esm.js.map

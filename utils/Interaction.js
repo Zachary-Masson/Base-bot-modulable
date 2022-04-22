@@ -57,7 +57,7 @@ class Interaction {
             }
         }
         execute({
-            config: commandData['modulesParent'] ? this._modules.filter(data => data.tag === commandData.modulesParent)[0].config : {},
+            config: this._modules.filter(data => data.tag === commandSearch.modulesParent)[0].config,
             events: this._events,
             client: this._client,
             databaseModel: this._databaseModel
@@ -71,7 +71,7 @@ class Interaction {
         if (!buttonSearch) return InteractionError(interaction, "The button is available !");
         const {buttonData, execute} = buttonSearch;
         execute({
-            config: buttonData['modulesParent'] ? this._modules.filter(data => data.tag === buttonData.modulesParent)[0].config : {},
+            config: this._modules.filter(data => data.tag === buttonSearch.modulesParent)[0].config,
             events: this._events,
             client: this._client,
             databaseModel: this._databaseModel

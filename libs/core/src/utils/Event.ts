@@ -12,6 +12,13 @@ export class Event {
     }
 
     // @ts-ignore
+    public setExecute(func) {
+        this._execute = func;
+        // @ts-ignore
+        return this;
+    }
+
+    // @ts-ignore
     public get execute() {
         return this._execute;
     }

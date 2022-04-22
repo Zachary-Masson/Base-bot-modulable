@@ -12,5 +12,4 @@ export * from "./utils/Command";
 export * from "./utils/Button";
 export * from "./utils/Event";
 export * from "./utils/ModulesManifest";
-export * from "./utils/Error";
 export * from "./utils/Modules";

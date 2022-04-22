@@ -124,7 +124,7 @@ class ModulesClass {
 
     cleanPackageJson(packages) {
         let finalLineCommandsInstall = "npm remove"
-        const packagesDefault = ['@discordjs/rest', 'discord-api-types', 'discord.js', 'dotenv', 'express', 'body-parser', 'cors'];
+        const packagesDefault = ['@discordjs/rest', 'discord-api-types', 'discord.js', 'dotenv', 'express', 'body-parser', 'cors', 'cli-color'];
         Object.keys(packagesJson.dependencies).map(pkg => {
             if (packagesDefault.includes(pkg)) return;
             if (packages.includes(pkg)) return;
